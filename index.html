@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Document System - Intelligent Document Interaction</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="container">
+                <div class="header-content">
+                    <h1 class="header-title">
+                        <i class="fas fa-brain"></i>
+                        LLM Document System
+                    </h1>
+                    <nav class="nav-tabs">
+                        <button class="nav-tab active" data-tab="upload">
+                            <i class="fas fa-upload"></i>
+                            Upload Documents
+                        </button>
+                        <button class="nav-tab" data-tab="questions">
+                            <i class="fas fa-question-circle"></i>
+                            Ask Questions
+                        </button>
+                        <button class="nav-tab" data-tab="history">
+                            <i class="fas fa-history"></i>
+                            Query History
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Upload Documents Tab -->
+                <div id="upload-tab" class="tab-content active">
+                    <div class="page-header">
+                        <h2>Upload Documents</h2>
+                        <p class="page-description">Upload PDF and DOCX files for intelligent document analysis</p>
+                    </div>
+
+                    <div class="upload-section">
+                        <div class="upload-zone" id="upload-zone">
+                            <div class="upload-content">
+                                <i class="fas fa-cloud-upload-alt upload-icon"></i>
+                                <h3>Drag & drop files here</h3>
+                                <p>or <button class="btn btn--outline" id="browse-btn">browse files</button></p>
+                                <p class="upload-hint">Supports PDF and DOCX files up to 10MB</p>
+                            </div>
+                            <input type="file" id="file-input" multiple accept=".pdf,.docx,.doc" style="display: none;">
+                        </div>
+
+                        <div class="upload-progress hidden" id="upload-progress">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progress-fill"></div>
+                            </div>
+                            <p class="progress-text" id="progress-text">Uploading...</p>
+                        </div>
+                    </div>
+
+                    <div class="documents-section">
+                        <div class="section-header">
+                            <h3>Uploaded Documents</h3>
+                            <span class="document-count" id="document-count">3 documents</span>
+                        </div>
+                        <div class="documents-grid" id="documents-grid">
+                            <!-- Documents will be populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ask Questions Tab -->
+                <div id="questions-tab" class="tab-content">
+                    <div class="page-header">
+                        <h2>Ask Questions</h2>
+                        <p class="page-description">Query your documents using natural language</p>
+                    </div>
+
+                    <div class="query-section">
+                        <div class="query-form">
+                            <div class="form-group">
+                                <label class="form-label" for="document-select">Select Document</label>
+                                <select class="form-control" id="document-select">
+                                    <option value="">Choose a document...</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="question-input">Your Question</label>
+                                <textarea 
+                                    class="form-control question-textarea" 
+                                    id="question-input"
+                                    placeholder="Ask anything about your document, e.g., 'What are the payment terms?' or 'What are the termination conditions?'"
+                                    rows="4"
+                                ></textarea>
+                            </div>
+
+                            <button class="btn btn--primary btn--full-width" id="submit-question" disabled>
+                                <span class="btn-text">Ask Question</span>
+                                <i class="fas fa-spinner fa-spin hidden" id="question-loading"></i>
+                            </button>
+                        </div>
+
+                        <div class="results-section hidden" id="results-section">
+                            <div class="results-header">
+                                <h3>Answer</h3>
+                                <div class="result-actions">
+                                    <button class="btn btn--outline btn--sm" id="export-result">
+                                        <i class="fas fa-download"></i>
+                                        Export
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="answer-card">
+                                <div class="answer-content" id="answer-content">
+                                    <!-- Answer will be populated here -->
+                                </div>
+                                <div class="confidence-indicator">
+                                    <span class="confidence-label">Confidence:</span>
+                                    <div class="confidence-bar">
+                                        <div class="confidence-fill" id="confidence-fill"></div>
+                                    </div>
+                                    <span class="confidence-value" id="confidence-value">0%</span>
+                                </div>
+                            </div>
+
+                            <div class="sources-section">
+                                <h4>Source Clauses</h4>
+                                <div class="sources-list" id="sources-list">
+                                    <!-- Source clauses will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="recent-questions">
+                        <h3>Recent Questions</h3>
+                        <div class="questions-list" id="recent-questions">
+                            <!-- Recent questions will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Query History Tab -->
+                <div id="history-tab" class="tab-content">
+                    <div class="page-header">
+                        <h2>Query History</h2>
+                        <p class="page-description">View and manage your previous queries</p>
+                    </div>
+
+                    <div class="history-controls">
+                        <div class="search-box">
+                            <i class="fas fa-search search-icon"></i>
+                            <input type="text" class="form-control" id="history-search" placeholder="Search queries...">
+                        </div>
+                        <div class="filter-controls">
+                            <select class="form-control" id="document-filter">
+                                <option value="">All Documents</option>
+                            </select>
+                            <button class="btn btn--outline" id="export-history">
+                                <i class="fas fa-download"></i>
+                                Export History
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="history-table">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Document</th>
+                                    <th>Question</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-tbody">
+                                <!-- History rows will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Toast Notifications -->
+        <div class="toast-container" id="toast-container">
+            <!-- Toasts will be added here -->
+        </div>
+
+        <!-- Modal for Query Details -->
+        <div class="modal hidden" id="query-modal">
+            <div class="modal-overlay" id="modal-overlay"></div>
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">Query Details</h3>
+                    <button class="modal-close" id="modal-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body" id="modal-body">
+                    <!-- Modal content will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
